@@ -6,7 +6,7 @@ import json
 
 import nixops.util
 import nixops.resources
-import nixops.vault_common
+import nixopsvault.vault_common
 from nixops.diff import Diff, Handler
 from nixops.state import StateDict
 
@@ -72,7 +72,7 @@ class VaultKVSecretEngineState(nixops.resources.DiffEngineResourceState):
                 "force_no_cache": config["forceNoCache"],
             }
         }
-        r = nixops.vault_common.vault_post(
+        r = nixopsvault.vault_common.vault_post(
                 config['vaultToken'], config['vaultAddress'],
                 self._state['name'], data, "kv2engine")
         if r.status_code != 204:
@@ -101,13 +101,13 @@ class VaultKVSecretEngineState(nixops.resources.DiffEngineResourceState):
             metadata = {
                 "max_versions": i['maxVersions']
             }
-            r = nixops.vault_common.vault_post(
+            r = nixopsvault.vault_common.vault_post(
                     self._state['vaultToken'], self._state['vaultAddress'],
                     self._state['name'] + "/data/" + i['path'], data, "secret")
             if r.status_code != 200:
                 raise Exception("{} {}, {}".format(
                     r.status_code, r.reason, r.json()))
-            r = nixops.vault_common.vault_post(
+            r = nixopsvault.vault_common.vault_post(
                     self._state['vaultToken'], self._state['vaultAddress'],
                     self._state['name'] + "/metadata/" + i['path'], metadata, "secret")
             if r.status_code != 204:
@@ -131,7 +131,7 @@ class VaultKVSecretEngineState(nixops.resources.DiffEngineResourceState):
             "allowed_response_headers": config['allowedResponseHeaders']
         }
 
-        r = nixops.vault_common.vault_post(
+        r = nixopsvault.vault_common.vault_post(
                 config['vaultToken'], config['vaultAddress'],
                 self._state['name'] + '/tune', data, "kv2engine")
         if r.status_code != 204:
@@ -153,7 +153,7 @@ class VaultKVSecretEngineState(nixops.resources.DiffEngineResourceState):
         if self._state['name'] is None:
             return
 
-        r = nixops.vault_common.vault_get(
+        r = nixopsvault.vault_common.vault_get(
                 self._state['vaultToken'], self._state['vaultAddress'],
                 self._state['name'] + "/tune", "kv2engine")
         #TODO: should be 404 as the others but i get this
@@ -170,7 +170,7 @@ class VaultKVSecretEngineState(nixops.resources.DiffEngineResourceState):
     def _destroy(self):
         if self.state == self.MISSING: return
         self.log("deleting KV Secret Engine `{0}`...".format(self._state['name']))
-        r = nixops.vault_common.vault_delete(
+        r = nixopsvault.vault_common.vault_delete(
                 self._state['vaultToken'], self._state['vaultAddress'], self._state['name'], "kv2engine")
         if r.status_code == 204:
             pass

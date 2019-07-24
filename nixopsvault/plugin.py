@@ -16,5 +16,5 @@ def nixexprs():
 @nixops.plugins.hookimpl
 def load():
     return [
-        "nixopsvault.resources.vault",
+        "nixopsvault.resources",
     ]

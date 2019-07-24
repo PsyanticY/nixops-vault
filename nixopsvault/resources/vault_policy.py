@@ -6,7 +6,7 @@ import json
 
 import nixops.util
 import nixops.resources
-import nixops.vault_common
+import nixopsvault.vault_common
 from nixops.diff import Diff, Handler
 from nixops.state import StateDict
 
@@ -49,7 +49,7 @@ class VaultPolicyState(nixops.resources.DiffEngineResourceState):
 
     def create_after(self, resources, defn):
         return {r for r in resources if
-                isinstance(r, nixops.resources.vault_kv_secret_engine.VaultKVSecretEngineState)}
+                isinstance(r, nixopsvault.resources.vault_kv_secret_engine.VaultKVSecretEngineState)}
 
     def realize_create_policy(self, allow_recreate, update=False):
         config = self.get_defn()
@@ -69,7 +69,7 @@ class VaultPolicyState(nixops.resources.DiffEngineResourceState):
 
         data = {'policy': policy_definition}
 
-        r = nixops.vault_common.vault_post(
+        r = nixopsvault.vault_common.vault_post(
                 config['vaultToken'], config['vaultAddress'],
                 self._state['name'], data, "policy")
 
@@ -86,7 +86,7 @@ class VaultPolicyState(nixops.resources.DiffEngineResourceState):
         if self._state['name'] is None:
             return
 
-        r = nixops.vault_common.vault_get(
+        r = nixopsvault.vault_common.vault_get(
                 self._state['vaultToken'], self._state['vaultAddress'],
                 self._state['name'] , "policy")
 
@@ -101,7 +101,7 @@ class VaultPolicyState(nixops.resources.DiffEngineResourceState):
     def _destroy(self):
         if self.state != self.UP: return
         self.log("deleting policy `{0}`...".format(self._state['name']))
-        r = nixops.vault_common.vault_delete(
+        r = nixopsvault.vault_common.vault_delete(
                 self._state['vaultToken'], self._state['vaultAddress'],
                 self._state['name'], "policy")
         if r.status_code == 204:

@@ -1,4 +1,4 @@
-# NixOps backend for VirtualBox
+# NixOps backend for HashiCorp Vault
 
 NixOps (formerly known as Charon) is a tool for deploying NixOS
 machines in a network or cloud.

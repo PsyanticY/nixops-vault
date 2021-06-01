@@ -1,7 +1,9 @@
-# NixOps backend for HashiCorp Vault
+# NixOps Plugin for HashiCorp Vault
 
 NixOps (formerly known as Charon) is a tool for deploying NixOS
 machines in a network or cloud.
+
+This repo contains the NixOps Vault Plugin.
 
 * [Manual](https://nixos.org/nixops/manual/)
 * [Installation](https://nixos.org/nixops/manual/#chap-installation) / [Hacking](https://nixos.org/nixops/manual/#chap-hacking)
@@ -10,43 +12,30 @@ machines in a network or cloud.
 * [Issue Tracker](https://github.com/NixOS/nixops/issues)
 * [Mailing list / Google group](https://groups.google.com/forum/#!forum/nixops-users)
 * [IRC - #nixos on freenode.net](irc://irc.freenode.net/#nixos)
+* [Documentation](https://nixops.readthedocs.io/en/latest)
 
 ## Developing
 
-To start developing on nixops, you can run:
+To start developing on the NixOps Vault plugin, you can run:
+```bash
+  $ nix-shell -I channel:nixos-20.09 -p poetry
+  $ poetry install
+  $ poetry shell
+```
+To view active plugins:
 
 ```bash
-  $ ./dev-shell --arg p "(p: [ p.plugin1 ])"
+nixops list-plugins
 ```
+and you're ready to go.
 
-Where plugin1 can be any available nixops plugin, and where
-none or more than one can be specified, including local plugins.  An example is:
-
-
-```bash
-  $ ./dev-shell --arg p "(p: [ p.aws p.packet (p.callPackage ../myplugin/release.nix {})])"
-```
-
-To update the available nixops plugins, edit the
-all-plugins.txt file with any new plugin repos and
-then execute the update-all script.  This will refresh
-the data.nix file.
+The code should conform to style guide and types annotation standards so please make sure to run `black` and `mypy`.
 
 ## Building from source
 
-The command to build NixOps depends on your platform and which plugins you choose:
+The command to build NixOps depends on your platform.
 
-- `nix-build release.nix -A build.x86_64-linux --arg p "(p: [ p.plugin1 ])"` on 64 bit linux.
-- `nix-build release.nix -A build.i686-linux --arg p "(p: [ p.plugin1 ])"` on 32 bit linux.
-- `nix-build release.nix -A build.x86_64-darwin --arg p "(p: [ p.plugin1 ])"` on OSX.
+See the main NixOps repo instructions for how to built NixOps
+with this Vault plugin.
 
-Similarly, using NixOps from another project (for instance a nix-shell) can be done using:
-
-```nix
-stdenv.mkDerivation {
-  name = "my-nixops-env";
-  buildInputs = [
-    (import /path/to/nixops/release.nix { p = (p: [ p.plugin1 ]); }).build.x86_64-linux
-  ];
-}
-```
+This document is a work in progress.

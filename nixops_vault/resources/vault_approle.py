@@ -2,7 +2,7 @@ import json
 
 import nixops.util
 import nixops.resources
-import nixopsvault.vault_common
+import nixops_vault.vault_common
 
 
 class VaultApproleDefinition(nixops.resources.ResourceDefinition):
@@ -53,7 +53,7 @@ class VaultApproleState(nixops.resources.ResourceState):
 
     @property
     def resource_id(self):
-        return nixopsvault.vault_common.remote_path(self.vault_address, self.role_name, "approle") if self.role_name else None
+        return nixops_vault.vault_common.remote_path(self.vault_address, self.role_name, "approle") if self.role_name else None
 
     def get_definition_prefix(self):
         return "resources.vaultApprole."
@@ -61,7 +61,7 @@ class VaultApproleState(nixops.resources.ResourceState):
     def get_physical_spec(self):
         physical = {}
         if self.role_name:
-            physical['url'] = nixopsvault.vault_common.remote_path(
+            physical['url'] = nixops_vault.vault_common.remote_path(
                 self.vault_address, self.role_name, "approle")
             physical['roleId'] = self.role_id
             physical['secretId'] = self.secret_id
@@ -74,7 +74,7 @@ class VaultApproleState(nixops.resources.ResourceState):
         if self.role_id is None:
             return
 
-        r = nixopsvault.vault_common.vault_get(
+        r = nixops_vault.vault_common.vault_get(
                 self.vault_token, self.vault_address,
                 self.role_name + '/role-id', "approle")
 
@@ -87,7 +87,7 @@ class VaultApproleState(nixops.resources.ResourceState):
                 r.status_code, r.reason, r.json()))
 
     def _get_role_id_secret_id(self, defn):
-        r = nixopsvault.vault_common.vault_get(
+        r = nixops_vault.vault_common.vault_get(
                 self.vault_token, self.vault_address,
                 self.role_name + '/role-id', "approle")
 
@@ -102,7 +102,7 @@ class VaultApproleState(nixops.resources.ResourceState):
                 "cidr_list": defn.config['cidrList'],
                 "token_bound_cidrs": defn.config['tokenBoundCidrs']
             }
-            r = nixopsvault.vault_common.vault_post(
+            r = nixops_vault.vault_common.vault_post(
                 self.vault_token, self.vault_address,
                 self.role_name + '/secret-id', data, "approle")
 
@@ -116,8 +116,8 @@ class VaultApproleState(nixops.resources.ResourceState):
 
     def create_after(self, resources, defn):
         return {r for r in resources if
-                isinstance(r, nixopsvault.resources.vault_kv_secret_engine.VaultKVSecretEngineState) or
-                isinstance(r, nixopsvault.resources.vault_policy.VaultPolicyState)}
+                isinstance(r, nixops_vault.resources.vault_kv_secret_engine.VaultKVSecretEngineState) or
+                isinstance(r, nixops_vault.resources.vault_policy.VaultPolicyState)}
 
     def create(self, defn, check, allow_reboot, allow_recreate):
         self.vault_address = defn.config['vaultAddress']
@@ -141,7 +141,7 @@ class VaultApproleState(nixops.resources.ResourceState):
             "bind_secret_id": defn.config['bindSecretId'],
             "token_type": defn.config['tokenType']
         }
-        r = nixopsvault.vault_common.vault_post(
+        r = nixops_vault.vault_common.vault_post(
                 self.vault_token, self.vault_address,
                 self.role_name, data, "approle")
 
@@ -173,7 +173,7 @@ class VaultApproleState(nixops.resources.ResourceState):
         if self.state != self.UP:
             return
         self.log("deleting vault Approle {0} ...".format(self.role_name))
-        r = nixopsvault.vault_common.vault_delete(
+        r = nixops_vault.vault_common.vault_delete(
                 self.vault_token, self.vault_address, self.role_name, "approle")
         if r.status_code == 204:
             return True

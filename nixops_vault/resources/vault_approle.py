@@ -3,10 +3,13 @@ import json
 import nixops.util
 import nixops.resources
 import nixops_vault.vault_common
+from .types.vault_approle import VaultApproleOptions
 
 
 class VaultApproleDefinition(nixops.resources.ResourceDefinition):
     """Definition of a Vault Approle"""
+
+    config: VaultApproleOptions
 
     @classmethod
     def get_type(cls):
@@ -20,7 +23,7 @@ class VaultApproleDefinition(nixops.resources.ResourceDefinition):
         return "{0}".format(self.get_type())
 
 
-class VaultApproleState(nixops.resources.ResourceState):
+class VaultApproleState(nixops.resources.ResourceState[VaultApproleDefinition]):
     """State of a Vault Approle"""
 
     state = nixops.util.attr_property("state", nixops.resources.ResourceState.MISSING, int)
@@ -97,10 +100,10 @@ class VaultApproleState(nixops.resources.ResourceState):
             raise Exception("{} {}, {}".format(
                 r.status_code, r.reason, r.json()))
 
-        if defn.config['bindSecretId'] and self.state != self.UP:
+        if defn.config.bindSecretId and self.state != self.UP:
             data = {
-                "cidr_list": defn.config['cidrList'],
-                "token_bound_cidrs": defn.config['tokenBoundCidrs']
+                "cidr_list": defn.config.cidrList,
+                "token_bound_cidrs": defn.config.tokenBoundCidrs
             }
             r = nixops_vault.vault_common.vault_post(
                 self.vault_token, self.vault_address,
@@ -120,26 +123,26 @@ class VaultApproleState(nixops.resources.ResourceState):
                 isinstance(r, nixops_vault.resources.vault_policy.VaultPolicyState)}
 
     def create(self, defn, check, allow_reboot, allow_recreate):
-        self.vault_address = defn.config['vaultAddress']
-        self.vault_token = defn.config['vaultToken']
-        self.role_name = defn.config['roleName']
+        self.vault_address = defn.config.vaultAddress
+        self.vault_token = defn.config.vaultToken
+        self.role_name = defn.config.roleName
 
         self.log("Creating Approle '{}' at {} ...".format(
             self.role_name, self.vault_address))
 
         data = {
-            "token_ttl": defn.config['tokenTtl'],
-            "token_max_ttl": defn.config['tokenMaxTtl'],
-            "policies": defn.config['policies'],
-            "secret_id_bound_cidrs": defn.config['secretIdBoundCidrs'],
-            "token_bound_cidrs": defn.config['tokenBoundCidrs'],
-            "secret_id_num_uses": defn.config['secretIdNumUses'],
-            "secret_id_ttl": defn.config['secretIdTtl'],
-            "token_num_uses": defn.config['tokenNumUses'],
-            "period": defn.config['period'],
-            "enable_local_secret_ids": defn.config['enableLocalSecretIds'],
-            "bind_secret_id": defn.config['bindSecretId'],
-            "token_type": defn.config['tokenType']
+            "token_ttl": defn.config.tokenTtl,
+            "token_max_ttl": defn.config.tokenMaxTtl,
+            "policies": defn.config.policies,
+            "secret_id_bound_cidrs": defn.config.secretIdBoundCidrs,
+            "token_bound_cidrs": defn.config.tokenBoundCidrs,
+            "secret_id_num_uses": defn.config.secretIdNumUses,
+            "secret_id_ttl": defn.config.secretIdTtl,
+            "token_num_uses": defn.config.tokenNumUses,
+            "period": defn.config.period,
+            "enable_local_secret_ids": defn.config.enableLocalSecretIds,
+            "bind_secret_id": defn.config.bindSecretId,
+            "token_type": defn.config.tokenType
         }
         r = nixops_vault.vault_common.vault_post(
                 self.vault_token, self.vault_address,
@@ -153,21 +156,21 @@ class VaultApproleState(nixops.resources.ResourceState):
 
         with self.depl._db:
             self.state = self.UP
-            self.role_name = defn.config['roleName']
-            self.vault_address = defn.config['vaultAddress']
-            self.bind_secret_id = defn.config['bindSecretId']
-            self.secret_id_num_uses = defn.config['secretIdNumUses']
-            self.secret_id_ttl = defn.config['secretIdTtl']
-            self.token_num_uses = defn.config['tokenNumUses']
-            self.token_max_ttl = defn.config['tokenMaxTtl']
-            self.token_ttl = defn.config['tokenTtl']
-            self.period = defn.config['period']
-            self.enable_local_secret_ids = defn.config['enableLocalSecretIds']
-            self.token_type = defn.config['tokenType']
-            self.secret_id_bound_cidrs = defn.config['secretIdBoundCidrs']
-            self.token_bound_cidrs = defn.config['tokenBoundCidrs']
-            self.policies = defn.config['policies']
-            self.cidr_list = defn.config['cidrList']
+            self.role_name = defn.config.roleName
+            self.vault_address = defn.config.vaultAddress
+            self.bind_secret_id = defn.config.bindSecretId
+            self.secret_id_num_uses = defn.config.secretIdNumUses
+            self.secret_id_ttl = defn.config.secretIdTtl
+            self.token_num_uses = defn.config.tokenNumUses
+            self.token_max_ttl = defn.config.tokenMaxTtl
+            self.token_ttl = defn.config.tokenTtl
+            self.period = defn.config.period
+            self.enable_local_secret_ids = defn.config.enableLocalSecretIds
+            self.token_type = defn.config.tokenType
+            self.secret_id_bound_cidrs = defn.config.secretIdBoundCidrs
+            self.token_bound_cidrs = defn.config.tokenBoundCidrs
+            self.policies = defn.config.policies
+            self.cidr_list = defn.config.cidrList
 
     def _destroy(self):
         if self.state != self.UP:

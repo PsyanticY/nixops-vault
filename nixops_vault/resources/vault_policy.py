@@ -6,12 +6,15 @@ import json
 
 import nixops.util
 import nixops.resources
-import nixops_vault.vault_common
 from nixops.diff import Diff, Handler
 from nixops.state import StateDict
+import nixops_vault.vault_common
+from .types.vault_policy import VaultPolicyOptions
 
 class VaultPolicyDefinition(nixops.resources.ResourceDefinition):
     """Definition of a vault policy."""
+
+    config: VaultPolicyOptions
 
     @classmethod
     def get_type(cls):
@@ -24,11 +27,13 @@ class VaultPolicyDefinition(nixops.resources.ResourceDefinition):
     def show_type(self):
         return "{0}".format(self.get_type())
 
-class VaultPolicyState(nixops.resources.DiffEngineResourceState):
+class VaultPolicyState(nixops.resources.DiffEngineResourceState[VaultPolicyDefinition]):
     """State of a vault policy."""
 
+    definition_type = VaultPolicyDefinition
+
     state = nixops.util.attr_property("state", nixops.resources.ResourceState.MISSING, int)
-    policies = nixops.util.attr_property("policies", None)
+    policies = nixops.util.attr_property("policies", {}, "json")
     _reserved_keys = ['vaultToken']
 
     @classmethod
@@ -52,10 +57,10 @@ class VaultPolicyState(nixops.resources.DiffEngineResourceState):
                 isinstance(r, nixops_vault.resources.vault_kv_secret_engine.VaultKVSecretEngineState)}
 
     def realize_create_policy(self, allow_recreate, update=False):
-        config = self.get_defn()
-        self._state['name'] = config['name']
-        self._state['vaultAddress'] = config['vaultAddress']
-        self._state['vaultToken'] = config['vaultToken']
+        config = self.get_defn().config
+        self._state['name'] = config.name
+        self._state['vaultAddress'] = config.vaultAddress
+        self._state['vaultToken'] = config.vaultToken
 
         if self.policies:
             self.log("Updating policy `{0}`...".format(self._state['name']))
@@ -63,14 +68,14 @@ class VaultPolicyState(nixops.resources.DiffEngineResourceState):
             self.log("Creating policy `{0}`...".format(self._state['name']))
 
         policy_definition = ""
-        for i in config['policies']:
-            policy_definition = policy_definition + 'path "{0}" {{ capabilities = {1} }} '.format(i['path'],
-                                                                                                json.dumps(i['capabilities']))
+        for i in config.policies:
+            policy_definition = policy_definition + 'path "{0}" {{ capabilities = {1} }} '.format(i.path,
+                                                                                                json.dumps(i.capabilities))
 
         data = {'policy': policy_definition}
 
         r = nixops_vault.vault_common.vault_post(
-                config['vaultToken'], config['vaultAddress'],
+                config.vaultToken, config.vaultAddress,
                 self._state['name'], data, "policy")
 
         if r.status_code != 204:
@@ -79,8 +84,8 @@ class VaultPolicyState(nixops.resources.DiffEngineResourceState):
 
         with self.depl._db:
             self.state = self.UP
-            self._state['vaultAddress'] = config['vaultAddress']
-            self._state['policies'] = config['policies']
+            self._state['vaultAddress'] = config.vaultAddress
+            self._state['policies'] = config.policies
 
     def _check(self):
         if self._state['name'] is None:

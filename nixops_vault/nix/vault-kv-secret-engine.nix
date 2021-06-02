@@ -17,7 +17,7 @@ with lib;
     type = mkOption {
       default = "kv";
       type = types.str;
-      description = "secret engine type, this should always be se to kv";
+      description = "secret engine type, this should always be set to kv";
     };
     description = mkOption {
       default = "";

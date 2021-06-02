@@ -13,7 +13,9 @@ from nixops.resources import (
 
 class PolicyOptions(ResourceOptions):
     path: Union[str, ResourceEval]
-    capabilities: Sequence[Literal["create", "read", "update", "delete", "list", "sudo", "deny"]]
+    capabilities: Sequence[
+        Literal["create", "read", "update", "delete", "list", "sudo", "deny"]
+    ]
 
 
 class VaultPolicyOptions(ResourceOptions):

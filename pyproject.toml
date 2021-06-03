@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "nixops_vault"
+version = "1.0"
+description = "NixOps resources for HashiCorp Vault"
+authors = ["PsyanticY"]
+license = "LGPL-3.0-only"
+include = [ "nixops_vault/nix/*.nix" ]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+nixops = { git = "https://github.com/NixOS/nixops.git", rev = "master" }
+requests = "^2.25.1"
+typing-extensions = "^3.7.4"
+
+[tool.poetry.dev-dependencies]
+nose = "^1.3.7"
+mypy = "^0.812"
+black = "^21.5b2"
+
+[tool.poetry.plugins."nixops"]
+vault = "nixops_vault.plugin"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
